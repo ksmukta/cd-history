@@ -17,6 +17,18 @@ cd(){
 _go_back_cd(){
     if (( cd_history_index>0 )); then
         cd_history_index=$((cd_history_index-1))
+        # Check if the directory still exists
+        # or move to the directory that exists
+        if [[ ! -d ${cd_history[$cd_history_index]} ]]; then
+            start=$((cd_history_index+1))
+            while [[ ! -d ${cd_history[$cd_history_index]} ]]; do
+                cd_history_index=$((cd_history_index-1))
+            done
+            # create a splice of array [0:curr_index] + [start:end]
+            # remove the middle part i.e. all the directories that
+            # no longer exist.
+            cd_history=( "${cd_history[@]:0:(($cd_history_index+1))}" "${cd_history[@]:$start}" )
+        fi
         command cd ${cd_history[$cd_history_index]}
     fi
 }
